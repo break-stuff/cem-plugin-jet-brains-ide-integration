@@ -16,7 +16,7 @@ import type {
   WebTypeValue,
 } from "../../types";
 
-const EXCLUDED_TYPES = ["string", "boolean", "undefined", "number", "null"];
+const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
 let componentReferences: { [key: string]: Reference[] } = {};
 const defaultLabels = {
   slots: "Slots",
@@ -170,7 +170,7 @@ function getJsProperties(component: Declaration): JsProperties {
 }
 
 function getWebTypeProperties(component: Declaration): WebTypeAttribute[] {
-  return component.attributes.map(attr => {
+  return (component.attributes || component.members)?.map(attr => {
     return {
       name: attr.name,
       description: attr.description,
@@ -372,6 +372,12 @@ export function saveCustomDataFiles(tags: WebTypeElement[]) {
       config.webTypesFileName!,
       getWebTypesFileContents(tags)
     );
+
+    packageJson['web-types'] = path.join(config.outdir as string, config.webTypesFileName);
+    fs.writeFileSync(
+      './package.json',
+      JSON.stringify(packageJson, null, 2)
+    );
   }
 }
 
@@ -391,8 +397,8 @@ function saveFile(outdir: string, fileName: string, contents: string) {
 function getWebTypesFileContents(tags: WebTypeElement[]) {
   return `{
     "$schema": "https://json.schemastore.org/web-types",
-    "name": "@vaadin/date-picker",
-    "version": "24.0.0-alpha5",
+    "name": "${packageJson.name}",
+    "version": "${packageJson.version}",
     "description-markup": "markdown",
     "contributions": {
       "html": {
