@@ -16,7 +16,7 @@ import type {
   WebTypeValue,
 } from "../../types";
 
-const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
 let componentReferences: { [key: string]: Reference[] } = {};
 const defaultLabels = {
   slots: "Slots",
@@ -157,7 +157,7 @@ export function getTagList(
         ? componentReferences[`${component.tagName}`][0]?.url
         : "",
       attributes: getComponentAttributes(component),
-      js: getJsProperties(component)
+      js: getJsProperties(component),
     };
   });
 }
@@ -165,29 +165,33 @@ export function getTagList(
 function getJsProperties(component: Declaration): JsProperties {
   return {
     properties: getWebTypeProperties(component),
-    events: getWebTypeEvents(component)
-  }
+    events: getWebTypeEvents(component),
+  };
 }
 
 function getWebTypeProperties(component: Declaration): WebTypeAttribute[] {
-  return (component.attributes || component.members)?.map(attr => {
-    return {
-      name: attr.name,
-      description: attr.description,
-      value: {
-        type: attr.type?.text?.split('|')?.map(x => x.trim()) || []
-      }
-    }
-  }) || [];
+  return (
+    (component.attributes || component.members)?.map((attr) => {
+      return {
+        name: attr.name,
+        description: attr.description,
+        value: {
+          type: attr.type?.text,
+        },
+      };
+    }) || []
+  );
 }
 
 function getWebTypeEvents(component: Declaration): WebTypeEvent[] {
-  return component.events?.map(event => {
-    return {
-      name: event.name,
-      description: event.description
-    }
-  }) || [];
+  return (
+    component.events?.map((event) => {
+      return {
+        name: event.name,
+        description: event.description,
+      };
+    }) || []
+  );
 }
 
 function getDescription(component: Declaration) {
@@ -241,22 +245,13 @@ function getComponentAttributes(component: Declaration) {
     attributes.push({
       name: attr.fieldName || attr.name,
       description: attr.description,
-      value: getAttributeValues(attr),
+      value: {
+        type: attr.type?.text,
+      },
     } as WebTypeAttribute);
   });
 
   return attributes;
-}
-
-function getAttributeValues(attr: Attribute): WebTypeValue {
-  const value = attr.type?.text;
-  return !value
-    ? { type: [] }
-    : {
-        type: (value.includes("|") ? value.split("|") : value.split(",")).map(
-          (type) => removeQuoteWrappers(type)
-        ),
-      };
 }
 
 function getEventDocs(component: Declaration) {
@@ -372,12 +367,7 @@ export function saveCustomDataFiles(tags: WebTypeElement[]) {
       config.webTypesFileName!,
       getWebTypesFileContents(tags)
     );
-
-    packageJson['web-types'] = path.join(config.outdir as string, config.webTypesFileName);
-    fs.writeFileSync(
-      './package.json',
-      JSON.stringify(packageJson, null, 2)
-    );
+    savePackageJson(packageJson);
   }
 }
 
@@ -392,6 +382,14 @@ function saveFile(outdir: string, fileName: string, contents: string) {
     path.join(outdir, fileName),
     prettier.format(contents, { parser: "json" })
   );
+}
+
+function savePackageJson(packageJson: any) {
+  packageJson["web-types"] = path.join(
+    config.outdir as string,
+    config.webTypesFileName as string
+  );
+  fs.writeFileSync("./package.json", JSON.stringify(packageJson, null, 2));
 }
 
 function getWebTypesFileContents(tags: WebTypeElement[]) {
