@@ -41,7 +41,7 @@ interface WebTypeAttribute {
 }
 
 interface WebTypeValue {
-  type: string[];
+  type: string;
 }
 
 interface JsProperties {
