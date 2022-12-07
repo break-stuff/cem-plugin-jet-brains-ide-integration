@@ -12,7 +12,7 @@
     "/dist"
   ],
   "scripts": {
-    "demo": "tsc && cem analyze",
+    "build": "tsc",
     "deploy": "tsc && npm publish",
     "test": "jest"
   },
@@ -27,7 +27,6 @@
   },
   "homepage": "https://github.com/break-stuff/cem-plugin-jet-brains-ide-integration#readme",
   "devDependencies": {
-    "@custom-elements-manifest/analyzer": "^0.6.6",
     "@types/jest": "^29.2.3",
     "@types/node": "^18.11.9",
     "ts-jest": "^29.0.3"
