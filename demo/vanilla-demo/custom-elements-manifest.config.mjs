@@ -1,4 +1,4 @@
-import { generateCustomData } from "../../index.js";
+import { generateWebTypes } from "../../index.js";
 
 export default {
   /** Globs to analyze */
@@ -14,5 +14,5 @@ export default {
   /** Output CEM path to `package.json`, defaults to true */
   packagejson: true,
   /** Provide custom plugins */
-  plugins: [generateCustomData()],
+  plugins: [generateWebTypes()],
 };

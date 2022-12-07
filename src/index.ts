@@ -1,12 +1,12 @@
 import {
-    generateCustomDataFile,
+    generateWebTypesFile,
     logPluginInit,
     setComponentReferences,
     updateConfig,
   } from "./web-type-generator/generator.js";
   import type { Options, Params } from "../types";
   
-  export function generateCustomData(params: Options = {}) {
+  export function generateWebTypes(params: Options = {}) {
     updateConfig(params);
   
     return {
@@ -17,7 +17,7 @@ import {
       },
       packageLinkPhase({ customElementsManifest }: Params) {
         logPluginInit();
-        generateCustomDataFile(customElementsManifest);
+        generateWebTypesFile(customElementsManifest);
       },
     };
   }

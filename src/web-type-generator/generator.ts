@@ -203,7 +203,7 @@ function getDescription(component: Declaration) {
   );
 }
 
-export function generateCustomDataFile(
+export function generateWebTypesFile(
   customElementsManifest: CustomElementsManifest
 ) {
   const elements = config.webTypesFileName
