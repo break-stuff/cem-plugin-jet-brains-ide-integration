@@ -1,7 +1,11 @@
+/**
+ * CONFIGURATION
+ */
+
 export interface Options {
   /** Path to output directory */
   outdir?: string;
-  /** Name of the file with you component's custom HTML data */
+  /** Name of the file for your custom data */
   webTypesFileName?: string | null;
   /** Class names of any components you would like to exclude from the custom data */
   exclude?: string[];
@@ -15,6 +19,10 @@ export interface Options {
   cssPropertiesDocs?: boolean;
   /** Displays the CSS parts section of the element description */
   cssPartsDocs?: boolean;
+  /** Excludes any custom element documentation */
+  excludeHtml?: boolean;
+  /** Excludes any custom CSS documentation */
+  excludeCss?: boolean;
   /** Overrides the default section labels in the component description */
   labels?: DescriptionLabels;
 }
@@ -26,10 +34,15 @@ interface DescriptionLabels {
   cssParts?: string;
 }
 
+
+/**
+ * WEB-TYPE
+ */
+
 export interface WebTypeElement {
   name: string;
   description: string;
-  docUrl: string
+  ['doc-url']: string;
   attributes: WebTypeAttribute[];
   js?: JsProperties;
 }
@@ -54,40 +67,19 @@ interface WebTypeEvent {
   description: string;
 }
 
-// export interface CssSet {
-//   name: string;
-//   values: CssValue[] | string[];
-// }
+interface WebTypePseudoElement {
+  name: string;
+  description: string;
+  docUrl?: string;
+  arguments?: boolean;
+  deprecated?: boolean;
+}
 
-// export interface CssValue {
-//   name: string;
-//   description?: string;
-// }
-
-// export interface Tag {
-//   name: string;
-//   description?: string;
-//   attributes?: TagAttribute[];
-//   references?: Reference[];
-// }
-
-// export interface VsCssProperty {
-//   name: string;
-//   description?: string;
-//   values?: Value[];
-//   references?: Reference[];
-// }
-
-// interface TagAttribute {
-//   name: string;
-//   description?: string;
-//   values?: Value[];
-//   references?: Reference[];
-// }
-
-// interface Value {
-//   name: string;
-// }
+interface WebTypeCssProperty {
+  name: string;
+  description?: string;
+  values?: string[];
+}
 
 interface Reference {
   name: string;

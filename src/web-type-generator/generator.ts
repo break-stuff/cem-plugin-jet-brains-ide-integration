@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import prettier from "prettier";
 import type {
-  Attribute,
   CssPart,
   CssProperty,
   CustomElementsManifest,
@@ -11,9 +10,10 @@ import type {
   Options,
   Reference,
   WebTypeAttribute,
+  WebTypeCssProperty,
   WebTypeElement,
   WebTypeEvent,
-  WebTypeValue,
+  WebTypePseudoElement,
 } from "../../types";
 
 const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
@@ -34,6 +34,8 @@ export let config: Options = {
   eventDocs: true,
   cssPropertiesDocs: true,
   cssPartsDocs: true,
+  excludeHtml: false,
+  excludeCss: false,
   labels: {},
 };
 
@@ -42,86 +44,53 @@ export function updateConfig(params: Options) {
   config.labels = { ...defaultLabels, ...params?.labels };
 }
 
-// export function getCssPropertyList(
-//   customElementsManifest: CustomElementsManifest
-// ): VsCssProperty[] {
-//   const components = getComponents(customElementsManifest);
-//   return (
-//     components?.map((component) => {
-//       return (
-//         component.cssProperties?.map((prop) => {
-//           return {
-//             name: prop.name,
-//             description: prop.description,
-//             values: getCssPropertyValues(prop?.type?.text),
-//           };
-//         }) || []
-//       );
-//     }) || []
-//   ).flat();
-// }
+export function getCssPropertyList(
+  customElementsManifest: CustomElementsManifest
+): WebTypeCssProperty[] {
+  const components = getComponents(customElementsManifest);
+  return (
+    components?.map((component) => {
+      return (
+        component.cssProperties?.map((prop) => {
+          return {
+            name: prop.name,
+            description: prop.description,
+          };
+        }) || []
+      );
+    }) || []
+  ).flat();
+}
 
-// export function getCssPartList(
-//   customElementsManifest: CustomElementsManifest
-// ) {
-//   const components = getComponents(customElementsManifest);
-//   return (
-//     components?.map((component) => {
-//       return (
-//         component.cssParts?.map((prop) => {
-//           return {
-//             name: `::part(${prop.name})`,
-//             description: prop.description,
-//           };
-//         }) || []
-//       );
-//     }) || []
-//   ).flat();
-// }
+export function getCssPartList(
+  customElementsManifest: CustomElementsManifest
+): WebTypePseudoElement[] {
+  const components = getComponents(customElementsManifest);
+  return (
+    components?.map((component) => {
+      return (
+        component.cssParts?.map((prop) => {
+          return {
+            name: `part(${prop.name})`,
+            description: prop.description,
+          };
+        }) || []
+      );
+    }) || []
+  ).flat();
+}
 
-// export function getCssPropertyValues(value?: string): CssValue[] {
-//   if (!value) {
-//     return [];
-//   }
+export function getCssPropertyValues(value?: string): string[] {
+  return value
+    ? (value.includes("|") ? value.split("|") : value.split(",")).map((x) =>
+        getCssNameValue(x.trim())
+      )
+    : [];
+}
 
-//   if (value.trim().startsWith("set")) {
-//     return getValueSet(value);
-//   }
-
-//   return getCssValues(value);
-// }
-
-// export function getValueSet(value: string): CssValue[] {
-//   const setName = value.split(":")[1];
-//   const valueSet =
-//     config.cssSets?.find((x) => x.name.trim() === setName)?.values || [];
-
-//   return valueSet.map((x) => {
-//     if (typeof x === "string") {
-//       return {
-//         name: getCssNameValue(x),
-//       };
-//     } else {
-//       x.name = getCssNameValue(x.name);
-//       return x;
-//     }
-//   });
-// }
-
-// export function getCssValues(value: string): CssValue[] {
-//   return value
-//     ? (value.includes("|") ? value.split("|") : value.split(",")).map((x) => {
-//         const propName = x.trim();
-//         return {
-//           name: getCssNameValue(propName),
-//         };
-//       })
-//     : [];
-// }
-
-// function getCssNameValue(value: string) {
-//   return !value ? "" : value.startsWith("--") ? `var(${value})` : value;
-// }
+function getCssNameValue(value: string) {
+  return !value ? "" : value.startsWith("--") ? `var(${value})` : value;
+}
 
 export function getTagList(
   customElementsManifest: CustomElementsManifest
@@ -149,11 +118,13 @@ export function getTagList(
           )}`
         : "";
 
+    console.log("REFERENCES", has(componentReferences[`${component.tagName}`]) ? componentReferences[`${component.tagName}`][0]?.url : '');
+
     return {
       name: component.tagName,
       description:
         getDescription(component) + slots + events + cssProps + parts,
-      docUrl: componentReferences?.length
+      ["doc-url"]: has(componentReferences[`${component.tagName}`])
         ? componentReferences[`${component.tagName}`][0]?.url
         : "",
       attributes: getComponentAttributes(component),
@@ -209,14 +180,10 @@ export function generateWebTypesFile(
   const elements = config.webTypesFileName
     ? getTagList(customElementsManifest)
     : [];
-  // const cssProperties = config.cssFileName
-  //   ? getCssPropertyList(customElementsManifest)
-  //   : [];
-  // const cssParts = config.cssFileName
-  //   ? getCssPartList(customElementsManifest)
-  //   : [];
+  const cssProperties = getCssPropertyList(customElementsManifest);
+  const cssParts = getCssPartList(customElementsManifest);
 
-  saveCustomDataFiles(elements);
+  saveWebTypeFile(elements, cssProperties, cssParts);
 }
 
 function getComponents(customElementsManifest: CustomElementsManifest) {
@@ -358,14 +325,18 @@ export function logPluginInit() {
   );
 }
 
-export function saveCustomDataFiles(tags: WebTypeElement[]) {
+export function saveWebTypeFile(
+  tags: WebTypeElement[],
+  cssProperties: WebTypeCssProperty[],
+  parts: WebTypePseudoElement[]
+) {
   createOutdir(config.outdir!);
 
   if (config.webTypesFileName) {
     saveFile(
       config.outdir!,
       config.webTypesFileName!,
-      getWebTypesFileContents(tags)
+      getWebTypesFileContents(tags, cssProperties, parts)
     );
     savePackageJson(packageJson);
   }
@@ -392,24 +363,32 @@ function savePackageJson(packageJson: any) {
   fs.writeFileSync("./package.json", JSON.stringify(packageJson, null, 2));
 }
 
-function getWebTypesFileContents(tags: WebTypeElement[]) {
+function getWebTypesFileContents(
+  tags: WebTypeElement[],
+  cssProperties: WebTypeCssProperty[],
+  parts: WebTypePseudoElement[]
+) {
   return `{
     "$schema": "https://json.schemastore.org/web-types",
     "name": "${packageJson.name}",
     "version": "${packageJson.version}",
     "description-markup": "markdown",
     "contributions": {
-      "html": {
+      ${
+        config.excludeHtml
+          ? ""
+          : `"html": {
         "elements": ${JSON.stringify(tags)}
+      },`
+      }
+      ${
+        config.excludeCss
+          ? ""
+          : `"css": {
+        "properties": ${JSON.stringify(cssProperties)},
+        "pseudo-elements": ${JSON.stringify(parts)}
+      }`
       }
     }
   }`;
 }
-
-// function getCustomCssDataFileContents(properties: VsCssProperty[], parts: VsCssProperty[]) {
-//   return `{
-//       "version": 1.1,
-//       "properties": ${JSON.stringify(properties)},
-//       "pseudoElements": ${JSON.stringify(parts)}
-//     }`;
-// }
