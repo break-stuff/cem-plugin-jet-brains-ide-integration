@@ -62,7 +62,7 @@
           "cssProperties": [
             {
               "type": {
-                "text": "set:radiuses"
+                "text": "--radius-sm|--radius-md|--radius-lg"
               },
               "description": "Controls the border radius of the radio buttons",
               "name": "--border-radius"
