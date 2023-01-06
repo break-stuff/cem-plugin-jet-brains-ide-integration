@@ -1,6 +1,6 @@
 {
   "name": "cem-plugin-jet-brains-ide-integration",
-  "version": "1.0.0",
+  "version": "1.0.0-beta.0",
   "description": "A custom elements manifest analyzer plugin to generate configuration files for web component integration with JetBrains IDEs",
   "main": "index.js",
   "types": "index.d.ts",
@@ -26,6 +26,9 @@
     "url": "https://github.com/break-stuff/cem-plugin-jet-brains-ide-integration/issues"
   },
   "homepage": "https://github.com/break-stuff/cem-plugin-jet-brains-ide-integration#readme",
+  "dependencies": {
+    "prettier": "^2.8.0"
+  },
   "devDependencies": {
     "@types/jest": "^29.2.3",
     "@types/node": "^18.11.9",
@@ -52,8 +55,5 @@
     "intellisense",
     "web components autocomplete",
     "web components intellisense"
-  ],
-  "dependencies": {
-    "prettier": "^2.8.0"
-  }
+  ]
 }
