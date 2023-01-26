@@ -118,8 +118,6 @@ export function getTagList(
           )}`
         : "";
 
-    console.log("REFERENCES", has(componentReferences[`${component.tagName}`]) ? componentReferences[`${component.tagName}`][0]?.url : '');
-
     return {
       name: component.tagName,
       description:
@@ -356,10 +354,9 @@ function saveFile(outdir: string, fileName: string, contents: string) {
 }
 
 function savePackageJson(packageJson: any) {
-  packageJson["web-types"] = path.join(
-    config.outdir as string,
-    config.webTypesFileName as string
-  );
+  packageJson["web-types"] =
+    (!config.outdir?.endsWith("/") ? config.outdir + "/" : config.outdir || "") +
+    config.webTypesFileName;
   fs.writeFileSync("./package.json", JSON.stringify(packageJson, null, 2));
 }
 
