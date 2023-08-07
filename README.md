@@ -1,5 +1,7 @@
 # cem-plugin-jet-brains-ide-integration
 
+> This project has been moved to the [Custom Element JetBrains Integration](https://www.npmjs.com/package/custom-element-jet-brains-integration) project.
+
 A custom elements manifest analyzer plugin to generate configuration files for web component integration with JetBrains IDEs
 
 This is a plugin automatically generates a `web-types.json` file for [JetBrains IDEs](https://www.jetbrains.com/) using the [Custom Element Manifest Analyzer](https://custom-elements-manifest.open-wc.org/).

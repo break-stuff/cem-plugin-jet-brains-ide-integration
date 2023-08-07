@@ -1,6 +1,6 @@
 {
   "name": "cem-plugin-jet-brains-ide-integration",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "A custom elements manifest analyzer plugin to generate configuration files for web component integration with JetBrains IDEs",
   "main": "index.js",
   "types": "index.d.ts",
